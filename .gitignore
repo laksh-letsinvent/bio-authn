@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+corpus/data/
+results/*.csv
+models/
+.venv/
+.DS_Store
+.obsidian/
