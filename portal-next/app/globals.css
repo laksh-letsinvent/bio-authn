@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Face Value design tokens */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border-c: var(--border-c);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent-c);
+  --color-accent-2: var(--accent-2);
+  --color-accept: var(--accept);
+  --color-uncertain: var(--uncertain);
+  --color-reject: var(--reject);
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* shadcn bridge */
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--accent-c);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--text-2);
+  --color-border: var(--border-c);
+  --color-input: var(--surface-2);
+  --color-ring: var(--accent-c);
+  --color-destructive: var(--reject);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+:root {
+  --background: #0A0D14;
+  --foreground: #E7ECF3;
+  --surface: #11161F;
+  --surface-2: #161C27;
+  --border-c: #222A37;
+  --text-2: #9BA6B5;
+  --text-3: #5E6A7A;
+  --accent-c: #38BDF8;
+  --accent-2: #818CF8;
+  --accept: #34D399;
+  --uncertain: #FBBF24;
+  --reject: #FB7185;
+  --accept-zone: rgba(52,211,153,.20);
+  --uncertain-zone: rgba(251,191,36,.18);
+  --reject-zone: rgba(251,113,133,.18);
+  --primary-glow: rgba(56,189,248,.45);
+  --primary-wash: rgba(56,189,248,.10);
+  --info-zone: rgba(56,189,248,.10);
+  --page-glow: radial-gradient(1100px 420px at 50% -12%, rgba(56,189,248,.08), transparent 70%);
+  --sidebar-w: 240px;
+  --radius: 0.625rem;
+  /* shadcn */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--accent-c);
+  --primary-foreground: var(--background);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-2);
+  --border: var(--border-c);
+  --input: var(--surface-2);
+  --ring: var(--accent-c);
+  --destructive: var(--reject);
+}
+
+.light {
+  --background: #F7F9FC;
+  --foreground: #0F172A;
+  --surface: #FFFFFF;
+  --surface-2: #F1F4F9;
+  --border-c: #E2E8F0;
+  --text-2: #475569;
+  --text-3: #94A3B8;
+  --accent-c: #0284C7;
+  --accent-2: #6366F1;
+  --accept: #059669;
+  --uncertain: #D97706;
+  --reject: #E11D48;
+  --accept-zone: rgba(5,150,105,.12);
+  --uncertain-zone: rgba(217,119,6,.14);
+  --reject-zone: rgba(225,29,72,.10);
+  --primary-glow: rgba(2,132,199,.30);
+  --primary-wash: rgba(2,132,199,.10);
+  --info-zone: rgba(2,132,199,.10);
+  --page-glow: radial-gradient(1100px 420px at 50% -12%, rgba(2,132,199,.06), transparent 70%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  html.light {
+    color-scheme: light;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+  }
+  code, pre, .mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ─── Prose markdown ────────────────────────────────────────────── */
+.prose {
+  color: var(--foreground);
+}
+.prose h1 {
+  font-size: 1.9rem; font-weight: 700; margin: 2.5rem 0 1rem;
+  color: var(--foreground); font-family: var(--font-display);
+}
+.prose h2 {
+  font-size: 1.35rem; font-weight: 600; margin: 2.25rem 0 0.75rem;
+  color: var(--foreground); font-family: var(--font-display);
+  border-bottom: 1px solid var(--border-c); padding-bottom: 0.5rem;
+}
+.prose h3 {
+  font-size: 1.1rem; font-weight: 600; margin: 1.75rem 0 0.5rem;
+  color: var(--foreground); font-family: var(--font-display);
+}
+.prose h4 {
+  font-size: 0.95rem; font-weight: 600; margin: 1.25rem 0 0.4rem;
+  color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;
+}
+.prose p {
+  margin: 0.9rem 0; line-height: 1.75;
+}
+.prose a {
+  color: var(--accent-c); text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.prose a:hover { opacity: 0.8; }
+
+/* Bullet lists */
+.prose ul {
+  margin: 1rem 0 1rem 0; padding: 0;
+  list-style: none;
+}
+.prose ul > li {
+  position: relative; padding-left: 1.4rem; margin: 0.45rem 0;
+  line-height: 1.7;
+}
+.prose ul > li::before {
+  content: "▸";
+  position: absolute; left: 0;
+  color: var(--accent-c); font-size: 0.75rem; top: 0.18em;
+}
+.prose ul ul > li::before {
+  content: "·"; color: var(--text-3); top: 0.1em;
+}
+
+/* Ordered lists */
+.prose ol {
+  margin: 1rem 0; padding-left: 1.5rem;
+  counter-reset: prose-counter;
+  list-style: none;
+}
+.prose ol > li {
+  position: relative; padding-left: 1.6rem; margin: 0.45rem 0;
+  counter-increment: prose-counter; line-height: 1.7;
+}
+.prose ol > li::before {
+  content: counter(prose-counter) ".";
+  position: absolute; left: 0;
+  color: var(--accent-c); font-weight: 600; font-family: var(--font-mono);
+  font-size: 0.8rem; top: 0.12em;
+}
+
+.prose code {
+  font-family: var(--font-mono); font-size: 0.83em;
+  background: var(--surface-2); padding: 0.12em 0.45em;
+  border-radius: 4px; color: var(--accent-c);
+  border: 1px solid var(--border-c);
+}
+.prose pre {
+  background: var(--surface-2); border: 1px solid var(--border-c);
+  border-radius: 10px; padding: 1.1rem 1.25rem; overflow-x: auto;
+  margin: 1.25rem 0;
+}
+.prose pre code {
+  background: none; padding: 0; border: none; color: var(--foreground);
+}
+.prose table {
+  width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.88rem;
+  overflow-x: auto; display: block;
+}
+.prose th {
+  background: var(--surface-2); text-align: left;
+  padding: 0.55rem 0.85rem; border: 1px solid var(--border-c); font-weight: 600;
+  font-family: var(--font-display); font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2);
+}
+.prose td {
+  padding: 0.5rem 0.85rem; border: 1px solid var(--border-c); vertical-align: top;
+}
+.prose tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.prose blockquote {
+  border-left: 3px solid var(--accent-c); padding: 0.6rem 1.1rem;
+  margin: 1.25rem 0; color: var(--text-2);
+  background: var(--primary-wash); border-radius: 0 8px 8px 0;
+}
+.prose strong { color: var(--foreground); font-weight: 600; }
+.prose em { color: var(--text-2); }
+.prose hr {
+  border: none; border-top: 1px solid var(--border-c); margin: 2rem 0;
+}
+/* SVG diagrams in markdown */
+.prose svg { max-width: 100%; height: auto; }
