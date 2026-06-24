@@ -12,9 +12,7 @@ models/
 # --- eval results (CSV is large; eval_run.json is committed as showcase artifact) ---
 results/*.csv
 
-# --- portal generated assets (face images, regeneratable) ---
-portal/assets/faces/
-portal/data/pad_examples/
+# --- portal generated assets (regeneratable) ---
 
 # --- node ---
 node_modules/
