@@ -1,0 +1,20 @@
+[
+  {
+    "subject": "subject_1",
+    "genuine": "data/pad_examples/subject_1_genuine.jpg",
+    "print_attack": "data/pad_examples/subject_1_print.jpg",
+    "screen_attack": "data/pad_examples/subject_1_screen.jpg"
+  },
+  {
+    "subject": "subject_2",
+    "genuine": "data/pad_examples/subject_2_genuine.jpg",
+    "print_attack": "data/pad_examples/subject_2_print.jpg",
+    "screen_attack": "data/pad_examples/subject_2_screen.jpg"
+  },
+  {
+    "subject": "subject_3",
+    "genuine": "data/pad_examples/subject_3_genuine.jpg",
+    "print_attack": "data/pad_examples/subject_3_print.jpg",
+    "screen_attack": "data/pad_examples/subject_3_screen.jpg"
+  }
+]

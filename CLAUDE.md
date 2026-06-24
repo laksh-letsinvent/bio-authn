@@ -67,5 +67,7 @@ Avoid this vocabulary: delve, crucial, pivotal, landscape (figurative), foster, 
 - `DECISIONS.md` — what was decided and why (read before re-opening a settled question).
 - `THREAT_MODEL.md` — biometric attack→defense taxonomy.
 - `EVAL_METRICS.md` — the measurement discipline, with formulas and worked examples.
+- `STANDARDS.md` — ISO/IEC, iBeta, NIST FRTE/FATE, FIDO2 (split out of ATLAS §7).
+- `COMPLIANCE.md` — UK/EU regulation: GDPR, PSD2/SCA, FCA, DIATF/DVS, eIDAS2 (split out of ATLAS §8).
 
 When the build prompt and CONTEXT.md disagree, the build prompt wins.

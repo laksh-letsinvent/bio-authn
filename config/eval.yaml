@@ -1,0 +1,21 @@
+seed: 42
+corpus:
+  n_identities: 150
+  images_per_identity: 6
+  impostor_pairs: 7500
+  vlm_subset_pairs: 240
+  pad_bonafide: 200        # v2: bona-fide PAD samples
+  pad_attacks: 200         # v2: simulated attacks (~100 print / ~100 screen)
+  pad_vlm_subset: 200      # v2: PAD samples sent to VLM (100 bf / 100 attack)
+matchers:
+  arcface: true
+  insightface: true        # v2
+  vlm_claude: true
+  pad_baseline: true       # v2
+  pad_vlm: true            # v2
+vlm_mode: cli              # local (Ollama LLaVA, dev) | api (Anthropic key) | cli (Claude Code headless, no key)
+thresholds:
+  target_far: 0.01
+  uncertain_band_mode: relative   # v2 (Fix 1): band = threshold ± margin
+  uncertain_band_margin: 0.07
+far_targets: [0.01, 0.001]

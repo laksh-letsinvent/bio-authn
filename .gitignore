@@ -1,8 +1,42 @@
+# --- corpus (images + binaries, regeneratable) ---
+corpus/data/
+corpus/pad_attacks/
+corpus/manifest.json
+corpus/embeddings_arcface.pkl
+corpus/embeddings_insightface.pkl
+corpus/fairface_weights/
+
+# --- models (601MB InsightFace weights) ---
+models/
+
+# --- eval results (CSV is large; eval_run.json is committed as showcase artifact) ---
+results/*.csv
+
+# --- portal generated assets (face images, regeneratable) ---
+portal/assets/faces/
+portal/data/pad_examples/
+
+# --- node ---
+node_modules/
+portal/package-lock.json
+
+# --- python ---
 __pycache__/
 *.pyc
-corpus/data/
-results/*.csv
-models/
+*.pyo
+*.egg-info/
 .venv/
+venv/
+
+# --- personal notes ---
+Laksh-MD Files/
+feedback.md
+
+# --- scratch / local only ---
+dashboard/
+design/
+external-source/
+
+# --- os / editor ---
 .DS_Store
 .obsidian/
