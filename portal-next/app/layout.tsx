@@ -6,9 +6,36 @@ import { AppShell } from "@/components/AppShell";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+const BASE_URL = "https://bio-authn.letsinvent.co.uk";
+
 export const metadata: Metadata = {
   title: "Face Value — Biometric Eval Harness",
-  description: "An eval-first harness for selfie biometric authentication. Measures accuracy, fairness, calibration, cost, and latency across face matchers.",
+  description:
+    "An eval-first harness for selfie biometric authentication. ArcFace AUC 0.999, Claude VLM as second opinion (87% in-band accuracy), liveness detection, and fairness measurement — all on synthetic faces with every number reproducible.",
+  metadataBase: new URL(BASE_URL),
+  openGraph: {
+    type: "website",
+    url: BASE_URL,
+    siteName: "Face Value",
+    title: "Face Value — Biometric Eval Harness",
+    description:
+      "An eval-first harness for selfie biometric authentication. Measures accuracy, fairness, calibration, cost, and latency across ArcFace, InsightFace, and Claude VLM.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 627,
+        alt: "Face Value — Biometric Eval Harness",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Face Value — Biometric Eval Harness",
+    description:
+      "An eval-first harness for selfie biometric authentication. Measures accuracy, fairness, calibration, cost, and latency across ArcFace, InsightFace, and Claude VLM.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
