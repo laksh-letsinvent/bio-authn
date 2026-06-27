@@ -174,7 +174,7 @@ export default function LivePage() {
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-2)]">
           <StatusDot ok={backendOk} />
           <span>
-            {backendOk === null ? "checking…" : backendOk ? "backend connected" : "backend offline"}
+            {backendOk === null ? "checking…" : backendOk ? "backend connected" : "demo mode"}
           </span>
         </div>
       </div>
@@ -184,9 +184,9 @@ export default function LivePage() {
       </p>
 
       {backendOk === false && (
-        <div className="mb-6 p-4 rounded-xl border border-[var(--uncertain)] bg-[var(--uncertain-zone)] text-[var(--uncertain)] text-sm">
-          <strong>Backend offline.</strong> The demo still runs — enroll and verify will fall back to
-          mock scores so you can see the full UI flow.
+        <div className="mb-6 p-4 rounded-xl border border-[var(--border-c)] bg-[var(--surface-2)] text-[var(--text-2)] text-sm">
+          <strong className="text-[var(--foreground)]">Demo mode.</strong> Scores are simulated —
+          the real ArcFace embedder runs locally. The UI flow is identical.
         </div>
       )}
 
