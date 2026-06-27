@@ -234,6 +234,10 @@ export function LivenessClient() {
       {/* APCER/BPCER */}
       <section className="mb-8 p-5 rounded-xl border border-[var(--border-c)] bg-[var(--surface)]">
         <h2 className="text-base font-semibold mb-4" style={{ fontFamily: "var(--font-display)" }}>APCER / BPCER — liveness metrics</h2>
+        <div className="p-3 rounded-lg border border-[var(--uncertain)] bg-[var(--uncertain-zone)] text-[var(--uncertain)] text-xs mb-4">
+          Eval findings on this corpus: PAD baseline AUC 0.47 — no usable signal on synthetic data.
+          PAD VLM results cover obvious simulated attacks only — a floor, not a real-world number.
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             {

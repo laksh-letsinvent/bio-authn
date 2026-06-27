@@ -16,7 +16,7 @@ The harness runs three approaches over the same faces and scores them on the sam
 
 - Embedding matching. ArcFace and InsightFace turn a face into 512 numbers, then compare two of them. This is how production systems actually work.
 - A vision model as a second opinion. Claude looks at two photos and reasons out loud about whether they're the same person. Slow, pricey, and unusually good at explaining itself.
-- Liveness (PAD). Telling a live face from a photo of one. The part attackers actually go after. I'm building this now.
+- Liveness (PAD). Telling a live face from a photo of one. The part attackers actually go after.
 
 ## Four threads, one harness
 
@@ -71,6 +71,14 @@ Everything runs from a fixed seed, so anyone can reproduce it. The faces come fr
 
 I measure false accepts and false rejects at every threshold, the ROC curve, equal error rate, accuracy split by demographic group, whether the model's stated confidence is honest, cost per decision, and latency. The full method is in EVAL_METRICS.md. The vocabulary, about 130 terms, lives in the [Atlas](#atlas).
 
+### The matchers
+
+Five run over the same faces, scored on one ruler. ArcFace and InsightFace are open embedding models, ONNX, free, local. Claude is the vision model, used two ways: a second opinion on uncertain matches, and a passive liveness check. A frequency-and-texture detector is the cheap liveness baseline. Same interface for all five, so swapping one in is a single adapter.
+
+### Keeping the vision model cheap
+
+Every Claude call costs about 5 cents and 10 seconds, so it never runs on everything. It sees a small stratified sample. For the uncertain-band study I reused the calls I'd already paid for and added only the few that landed in the band, so the whole re-run cost a couple of dollars. The cost discipline is the finding, not an overhead.
+
 ## Under the hood
 
 The engine is a handful of clean parts, with more coming.
@@ -85,27 +93,21 @@ The engine is a handful of clean parts, with more coming.
 
 ## The stack
 
-Python, with ONNX runtime for the face models. (Getting there took a fight with macOS; that story's in DECISIONS.md.) Claude runs through its command line mode, so the whole thing works without an API key. The portal is plain HTML and JavaScript, one charting library, no framework. The theme is a handful of CSS variables, which is why light and dark mode took about ten minutes to add.
+Python, with ONNX runtime for the face models. (Getting there took a fight with macOS; that story's in DECISIONS.md.) Claude runs through its command line mode, so the whole thing works without an API key. The portal is a Next.js app with Tailwind and shadcn, dark and light, built to read well on a phone.
 
-## What it found so far
+## What it found
 
-The short version: the matcher is a commodity, and every interesting decision is about what surrounds it.
+The matcher is a commodity, and every interesting decision is about what surrounds it.
 
-What's solid, from the v1 run.
+The embedding match is very good and very boring. Both open models scored 0.999 AUC, with equal error rates under 2%. Choosing the matcher is not where you earn your keep.
 
-The embedding match is very good and very boring. Area under the curve of 0.999, equal error rate of 1.48%. The open model is as accurate as you'll need. Choosing the matcher is not where you earn your keep.
+The vision model is the interesting case. About 5 cents and 10 seconds per check, against milliseconds and nothing for the embedding match. You can't run it on every login. It earns its place as a second opinion on the cases the fast model is unsure about, and there it called 54 of 62 right. It missed 8, so it sits as a backup check rather than the main gate. Its stated confidence held up reasonably once measured (calibration error 0.065), which you only learn by checking.
 
-The vision model is a different animal. Roughly 5 cents and 10 seconds per decision, against milliseconds and nothing for the embedding match. You can't run that on every login. It pays off as a second opinion on the few cases the fast matcher is unsure about, and the economics are what decide that.
+Liveness showed the same split. The vision model told live faces from simulated print and screen attacks reasonably well (AUC 0.91). The cheap frequency detector had no usable signal on synthetic faces. Its assumption runs backwards when the live faces are smooth CGI and the fakes have texture added, which is itself a real finding about where signal processing breaks.
 
-Its confidence turned out reasonably honest, but only because I checked. Expected calibration error of 0.065. A model saying it's 90% sure means nothing until you've measured whether it's right 90% of the time.
+And the honest gap. I tried to measure demographic bias and couldn't. Labeling synthetic faces for skin tone with an off-the-shelf classifier came out degenerate, so I don't make a fairness claim here. Measuring fairness honestly is harder than measuring accuracy.
 
-What's still cooking.
-
-The exact "where does the second opinion earn its keep" figure is being re-measured. My first cut placed the uncertainty band in the wrong spot, the harness flagged it, and I'd rather fix it than ship it wrong. The instrument catching its own bug is the whole case for building the instrument.
-
-The fairness numbers aren't ready. My first corpus came out 87% male, which is no basis for a bias claim. I'm rebalancing it before I'll stand behind any group-level result, because an aggregate accuracy can quietly hide a group that gets rejected three times as often.
-
-PAD is the live build. I'm putting a cheap signal-processing detector up against the same vision model at spotting fake faces, scored on how often each one lets an attack through. Numbers soon.
+These are synthetic faces and simulated attacks, so read the liveness numbers as a floor. The real world will be harder.
 
 ## What this is not
 

@@ -146,6 +146,10 @@ function TabOverview({ data }: { data: EvalRun }) {
             </tbody>
           </table>
         </div>
+        <div className="mt-3 flex flex-col gap-1.5 text-[11px] text-[var(--text-3)]">
+          <div><span className="font-mono text-[var(--uncertain)]">pad_baseline</span> — no usable signal on synthetic data (AUC 0.47). Pixel-level texture features are near-random on DigiFace-1M renders; this row establishes the floor.</div>
+          <div><span className="font-mono text-[var(--uncertain)]">pad_vlm</span> — obvious simulated attacks only — a floor, not a real-world number. Performance reflects rendered print/screen artefacts, not physical PAI.</div>
+        </div>
       </Card>
 
       {/* Disagreement headline */}
@@ -270,25 +274,39 @@ function TabMatching({ data }: { data: EvalRun }) {
 
 function TabBias({ data }: { data: EvalRun }) {
   const arc = data.matchers.find((m) => m.matcher_id === "arcface") ?? data.matchers[0];
-  const groups = arc.by_group;
   const tooltipStyle = { background: "var(--surface-2)", border: "1px solid var(--border-c)", borderRadius: 8, fontSize: 11 };
-  const frrData = groups.map((g) => ({ name: g.group.replace(/^\w+:/, ""), frr: +(g.frr * 100).toFixed(2) }));
-  const farData = groups.map((g) => ({ name: g.group.replace(/^\w+:/, ""), far: +(g.far * 100).toFixed(2) }));
-  const dr = arc.disparity_ratio;
-  const drColor = dr == null ? "var(--text-2)" : dr > 2 ? "var(--reject)" : dr > 1.5 ? "var(--uncertain)" : "var(--accept)";
+
+  // Drop skin axis — ITA on DigiFace-1M synthetic faces produced a degenerate split
+  // (9712 dark / 38 light). Showing it would look broken and the signal is noise.
+  const sexGroups = arc.by_group.filter((g) => g.group.startsWith("sex:"));
+  const ageGroups = arc.by_group.filter((g) => g.group.startsWith("age:"));
+
+  const sexFrrData = sexGroups.map((g) => ({ name: g.group.replace("sex:", ""), frr: +(g.frr * 100).toFixed(2), n: g.n_pairs }));
+  const ageFrrData = ageGroups.map((g) => ({
+    name: g.group.replace("age:", "") + (g.n_pairs < 100 ? " *" : ""),
+    frr: +(g.frr * 100).toFixed(2),
+    n: g.n_pairs,
+  }));
+
+  // Disparity ratio computed over sex + age only (skin excluded)
+  const visibleGroups = [...sexGroups, ...ageGroups];
+  const frrs = visibleGroups.map((g) => g.frr).filter((v) => v > 0);
+  const drFiltered = frrs.length >= 2 ? Math.max(...frrs) / Math.min(...frrs) : null;
+  const drColor = drFiltered == null ? "var(--text-2)" : drFiltered > 2 ? "var(--reject)" : drFiltered > 1.5 ? "var(--uncertain)" : "var(--accept)";
 
   return (
     <div className="flex flex-col gap-6">
-      <Caveat text="~25 identities per demographic bucket gives trend-level signal only, not tight confidence intervals. FairFace labels on synthetic images are approximate. This panel demonstrates method, not a publishable audit." />
+      <Caveat text="Corpus is ~87% male — Female bucket has ~⅕ the pairs. ~25 identities per age bucket gives trend-level signal only, not tight confidence intervals. Thin buckets (marked *) have fewer than 100 pairs." />
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
-          <h3 className="text-sm font-semibold mb-1">FRR by group (@ operating threshold)</h3>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={frrData} margin={{ top:4, right:8, bottom:40, left:-10 }}>
+          <h3 className="text-sm font-semibold mb-1">FRR by sex (@ operating threshold)</h3>
+          <p className="text-xs text-[var(--text-2)] mb-3">Female FRR is higher — consistent with an ~87% male training corpus.</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={sexFrrData} margin={{ top:4, right:8, bottom:20, left:-10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-c)" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fill:"var(--text-3)", fontSize:9 }} angle={-35} textAnchor="end" />
+              <XAxis dataKey="name" tick={{ fill:"var(--text-3)", fontSize:10 }} />
               <YAxis tick={{ fill:"var(--text-3)", fontSize:10 }} unit="%" />
-              <Tooltip contentStyle={tooltipStyle} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, _, p) => [`${v}% (n=${p.payload.n})`, "FRR"]} />
               <Bar dataKey="frr" name="FRR %" fill="var(--uncertain)" opacity={0.8} radius={[4,4,0,0]} />
               <ReferenceLine y={+(arc.overall.frr * 100).toFixed(2)} stroke="var(--accent-c)" strokeDasharray="4 2"
                 label={{ value:"overall", fill:"var(--accent-c)", fontSize:9 }} />
@@ -296,30 +314,32 @@ function TabBias({ data }: { data: EvalRun }) {
           </ResponsiveContainer>
         </Card>
         <Card>
-          <h3 className="text-sm font-semibold mb-1">FAR by group (@ operating threshold)</h3>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={farData} margin={{ top:4, right:8, bottom:40, left:-10 }}>
+          <h3 className="text-sm font-semibold mb-1">FRR by age (@ operating threshold)</h3>
+          <p className="text-xs text-[var(--text-2)] mb-3">* under_25 bucket has &lt;100 pairs — directional only.</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={ageFrrData} margin={{ top:4, right:8, bottom:20, left:-10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-c)" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fill:"var(--text-3)", fontSize:9 }} angle={-35} textAnchor="end" />
+              <XAxis dataKey="name" tick={{ fill:"var(--text-3)", fontSize:9 }} />
               <YAxis tick={{ fill:"var(--text-3)", fontSize:10 }} unit="%" />
-              <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="far" name="FAR %" fill={MC.insightface} opacity={0.8} radius={[4,4,0,0]} />
-              <ReferenceLine y={+(arc.overall.far * 100).toFixed(2)} stroke="var(--accent-c)" strokeDasharray="4 2"
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, _, p) => [`${v}% (n=${p.payload.n})`, "FRR"]} />
+              <Bar dataKey="frr" name="FRR %" fill="var(--uncertain)" opacity={0.8} radius={[4,4,0,0]} />
+              <ReferenceLine y={+(arc.overall.frr * 100).toFixed(2)} stroke="var(--accent-c)" strokeDasharray="4 2"
                 label={{ value:"overall", fill:"var(--accent-c)", fontSize:9 }} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
       </div>
       <Card>
-        <h3 className="text-sm font-semibold mb-3">Disparity ratio (worst FRR ÷ best FRR)</h3>
+        <h3 className="text-sm font-semibold mb-3">Disparity ratio (worst FRR ÷ best FRR, sex + age only)</h3>
         <KpiGrid>
-          <Kpi label="Disparity ratio" value={dr == null ? "— (best=0)" : dr.toFixed(3)+"×"} color={drColor}
-            sub={`${arc.matcher_id} @ operating threshold`} />
+          <Kpi label="Disparity ratio" value={drFiltered == null ? "— (best=0)" : drFiltered.toFixed(2)+"×"} color={drColor}
+            sub="sex + age axes; skin excluded" />
           <Kpi label="Operating threshold" value={arc.operating_threshold.toFixed(4)} color="var(--accent-c)" />
-          <Kpi label="Corpus groups" value={String(groups.length)} color="var(--text-2)" sub="demographic buckets" />
+          <Kpi label="Sex pairs" value={`${sexGroups.find(g=>g.group==="sex:Female")?.n_pairs ?? 0}F / ${sexGroups.find(g=>g.group==="sex:Male")?.n_pairs ?? 0}M`} color="var(--text-2)" sub="imbalanced corpus" />
           <Kpi label="Fairness target" value="< 2×" color="var(--accept)" sub="ISO/IEC 19795 guidance" />
         </KpiGrid>
-        <p className="text-xs text-[var(--text-2)]">A ratio &gt;2× warrants investigation. Current corpus has limited group diversity — treat as directional.</p>
+        <p className="text-xs text-[var(--text-2)] mb-2">A ratio &gt;2× warrants investigation. Sex disparity is real and attributable to corpus imbalance, not a measurement artefact.</p>
+        <p className="text-xs text-[var(--text-3)] italic">Skin-tone axis not shown: ITA labeling on DigiFace-1M synthetic faces produced a degenerate result (98% dark, 2% light). Labels on synthetic CGI faces are too skewed to support a skin-tone claim, so I don't make one.</p>
       </Card>
     </div>
   );

@@ -356,6 +356,3 @@ Named for orientation; not endorsements. Architecture matters more than brand �
 - **VLM confidence ≠ VLM accuracy.** Not until calibration is measured.
 - **EER ≠ operating point.** Banks run far tighter than equal-error on the security side.
 
----
-
-*Maintenance note: §7–8 carry the dated facts (standards versions, regulatory timelines) most likely to age. Re-check FATE/FRTE results, DIATF/DVS version, and eIDAS 2.0 / EUDI milestones before reusing this in the public Atlas section.*
