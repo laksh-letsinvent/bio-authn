@@ -206,7 +206,7 @@ Why biometrics are not passwords: a stolen password is reset; a stolen face is p
 
 ## 7. Standards & certifications
 
-Full practitioner depth in `STANDARDS.md`. Main entries:
+Main entries:
 
 **ISO/IEC 2382-37** — biometrics vocabulary standard; the authority on precise term definitions when two teams or vendors mean different things by "verification."
 
@@ -226,7 +226,7 @@ Full practitioner depth in `STANDARDS.md`. Main entries:
 
 ## 8. Regulation (UK/EU focus)
 
-Full practitioner depth in `COMPLIANCE.md`. Main entries:
+Main entries:
 
 **UK GDPR + Data Protection Act 2018** — biometric data used for identification is special-category data; requires explicit lawful basis, a DPIA, and retention/erasure architecture. The sharp edge: what happens to an auth template seeded from an IDV selfie when the source is deleted?
 

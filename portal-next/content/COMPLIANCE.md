@@ -1,6 +1,6 @@
-# COMPLIANCE.md — bio-authN
+# Compliance
 
-The UK/EU regulatory obligations that shape a biometric auth product, and the design constraint each one imposes. Split out of `ATLAS.md` to keep the Atlas page stakeholder-light. Framed for decisions: not "what the law says" in the abstract, but "what it forces you to build differently."
+The UK/EU regulatory obligations that shape a biometric auth product, and the design constraint each one imposes. Framed for decisions: not "what the law says" in the abstract, but "what it forces you to build differently."
 
 > Regulatory timelines (DIATF/DVS versions, eIDAS 2.0 milestones) age fastest — re-verify before reuse. Current as of June 2026.
 
@@ -34,4 +34,4 @@ The UK/EU regulatory obligations that shape a biometric auth product, and the de
 
 ## What this means for bio-authN
 
-The prototype handles only synthetic faces and ephemeral self-capture, so it sits outside most of these obligations by design — that's deliberate (see `DECISIONS.md` D4, D9). But the governance phase (Phase 2) renders these constraints as product surfaces: a recorded consent and retention model, data lineage that answers the erasure question, and policy-as-config that an SCA/FCA interpretation can be encoded into. The point of naming them here is so the governance demo reflects real obligations rather than invented ones.
+The prototype handles only synthetic faces and ephemeral self-capture, so it sits outside most of these obligations by design. But the governance phase (Phase 2) renders these constraints as product surfaces: a recorded consent and retention model, data lineage that answers the erasure question, and policy-as-config that an SCA/FCA interpretation can be encoded into. The point of naming them here is so the governance demo reflects real obligations rather than invented ones.

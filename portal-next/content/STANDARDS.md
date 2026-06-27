@@ -1,6 +1,6 @@
-# STANDARDS.md — bio-authN
+# Standards
 
-The standards and certifications a biometric product is measured against. Split out of `ATLAS.md` so the Atlas page stays stakeholder-light; this is the practitioner depth. Each entry: what it governs, why it matters, and the tie to selfie-auth.
+The standards and certifications a biometric product is measured against. Each entry: what it governs, why it matters, and the tie to selfie-auth.
 
 > Dated facts (NIST program naming, ICAO migration) are the ones most likely to age — re-check before reuse.
 

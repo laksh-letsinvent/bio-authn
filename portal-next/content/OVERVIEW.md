@@ -69,7 +69,7 @@ Everything runs from a fixed seed, so anyone can reproduce it. The faces come fr
 | Impostor pairs (sampled) | 7,500 | Cross-identity; bounds FAR to ~1e-3, not 1e-4 |
 | VLM subset (stratified) | 240 pairs | 120 genuine / 120 impostor; bounds the VLM run (about $12 on the CLI path) |
 
-I measure false accepts and false rejects at every threshold, the ROC curve, equal error rate, accuracy split by demographic group, whether the model's stated confidence is honest, cost per decision, and latency. The full method is in EVAL_METRICS.md. The vocabulary, about 130 terms, lives in the [Atlas](#atlas).
+I measure false accepts and false rejects at every threshold, the ROC curve, equal error rate, accuracy split by demographic group, whether the model's stated confidence is honest, cost per decision, and latency. The vocabulary, about 130 terms, lives in the [Atlas](#atlas).
 
 ### The matchers
 
@@ -93,7 +93,7 @@ The engine is a handful of clean parts, with more coming.
 
 ## The stack
 
-Python, with ONNX runtime for the face models. (Getting there took a fight with macOS; that story's in DECISIONS.md.) Claude runs through its command line mode, so the whole thing works without an API key. The portal is a Next.js app with Tailwind and shadcn, dark and light, built to read well on a phone.
+Python, with ONNX runtime for the face models. Claude runs through its command line mode, so the whole thing works without an API key. The portal is a Next.js app with Tailwind and shadcn, dark and light, built to read well on a phone.
 
 ## What it found
 
@@ -111,7 +111,7 @@ These are synthetic faces and simulated attacks, so read the liveness numbers as
 
 ## What this is not
 
-A prototype. The faces are synthetic, the attacks are simulated, and the liveness here wouldn't survive a real fraudster. I name the limits on purpose, because a biometric story you can trust is one that's honest about where it stops. The attack-and-defense map is in THREAT_MODEL.md.
+A prototype. The faces are synthetic, the attacks are simulated, and the liveness here wouldn't survive a real fraudster. I name the limits on purpose, because a biometric story you can trust is one that's honest about where it stops.
 
 ## Where to look next
 
