@@ -91,7 +91,7 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
           </a>
         ) : (
           <a
-            href="https://hardcopy.letsinvent.co.uk"
+            href="https://bio-idv.letsinvent.co.uk"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-all"
           >
             <FileText size={12} className="shrink-0" />

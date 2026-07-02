@@ -11,7 +11,7 @@ Two eval-first harnesses in one repo, published as two separate portals:
 | Portal | Brand | Domain | Scope |
 |--------|-------|--------|-------|
 | **Face Value** | `face-value` | bio-authn.letsinvent.co.uk | Selfie biometric auth — face matching, PAD, fairness |
-| **Hard Copy** | `hard-copy` | hardcopy.letsinvent.co.uk | Document IDV — classify, extract, authenticate, face-match |
+| **Hard Copy** | `hard-copy` | bio-idv.letsinvent.co.uk | Document IDV — classify, extract, authenticate, face-match |
 
 Both are learning prototypes, not products. The eval instrument is the point; the biometric substrate is the vehicle.
 
@@ -79,7 +79,7 @@ Both brands live in the same build; two nginx vhosts point at the same `out/` di
 ### Deployment
 - VM: Linux, nginx, certbot TLS
 - Static files: `/var/www/bio-authn/portal-next/out/`
-- Nginx configs: `deploy/nginx-bio-authn.conf` (Face Value) · `deploy/nginx-hardcopy.conf` (Hard Copy)
+- Nginx configs: `deploy/nginx-bio-authn.conf` (Face Value) · `deploy/nginx-bio-idv.conf` (Hard Copy)
 - Build locally: `npm run build` (produces `out/`) then rsync to VM
 - Hard Copy needs a separate nginx vhost for `hardcopy.letsinvent.co.uk` pointing at the same `out/` directory, plus `location = / { return 302 /hardcopy/; }`
 
