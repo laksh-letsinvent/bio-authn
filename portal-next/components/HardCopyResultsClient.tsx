@@ -21,12 +21,12 @@ type Run = { id: string; timestamp: string; vlm_mode: string; total_cost_usd: nu
 type IdvRun = { schema_version: string; run: Run; extraction: Extraction; authenticity: Authenticity; face_match: FaceMatch };
 
 type V15AdapterMetrics = { apcer: number | null; bpcer: number | null; acer: number | null; auc: number | null; n: number | null };
-type V15Comparison = Record<string, { v1_synthetic: V15AdapterMetrics; v1_5_hf: V15AdapterMetrics; acer_delta?: number; auc_delta?: number }>;
+type V15Comparison = Record<string, { v1_synthetic: V15AdapterMetrics; v1_5_sidtd: V15AdapterMetrics; acer_delta?: number; auc_delta?: number }>;
 type IdvRunV15 = {
   schema_version: string;
   run: { id: string; timestamp: string; vlm_mode: string; total_cost_usd: number; note: string };
   source: { dataset: string; license: string; attribution: string; is_synthetic: boolean; framing: string };
-  authenticity: { dataset: string; n_genuine: number; n_forged: number; n_ela: number; n_vlm: number; adapters: AuthAdapter[] };
+  authenticity: { dataset: string; n_genuine: number; n_forged: number; n_countries: number; n_forgery_types: number; adapters: AuthAdapter[] };
   generalization_comparison: V15Comparison;
 };
 
@@ -249,75 +249,73 @@ function FaceMatchTab({ data }: { data: FaceMatch }) {
 function GeneralizationTab({ data }: { data: IdvRunV15 }) {
   const cmp = data.generalization_comparison;
   const vlm = cmp["vlm_doc_auth"];
-  const ela = cmp["auth_baseline"];
 
   const barData = [
-    { adapter: "VLM", v1_auc: vlm?.v1_synthetic?.auc ?? 0, v15_auc: vlm?.v1_5_hf?.auc ?? 0 },
-    { adapter: "ELA", v1_auc: ela?.v1_synthetic?.auc ?? 0, v15_auc: ela?.v1_5_hf?.auc ?? 0 },
+    { label: "v1 — synthetic", auc: vlm?.v1_synthetic?.auc ?? 0 },
+    { label: "v1.5 — SIDTD", auc: vlm?.v1_5_sidtd?.auc ?? 0 },
   ];
 
-  const sign = (n: number | undefined) => n === undefined ? "—" : n > 0.01 ? `▲ +${(n*100).toFixed(1)}pp` : n < -0.01 ? `▼ ${(n*100).toFixed(1)}pp` : "≈ stable";
+  const sign = (n: number | undefined) =>
+    n === undefined ? "—" : n > 0.01 ? `▲ +${(n*100).toFixed(1)}pp` : n < -0.01 ? `▼ ${(n*100).toFixed(1)}pp` : "≈ stable";
+
+  const n_docs = data.authenticity.n_genuine + data.authenticity.n_forged;
+  const aucDelta = vlm?.auc_delta ?? 0;
 
   return (
     <div className="space-y-5">
-      <Caveat text={`Dataset: ${data.source.dataset} · ${data.source.license} · ${data.authenticity.n_genuine} genuine + ${data.authenticity.n_forged} forged`} />
       <InfoBanner text={data.source.framing} />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Kpi label="VLM AUC — v1" value={fmt(vlm?.v1_synthetic?.auc ?? 0)} sub="synthetic corpus" color="var(--accept)" />
-        <Kpi label="VLM AUC — v1.5" value={fmt(vlm?.v1_5_hf?.auc ?? 0)} sub="HF SID_Set" color={((vlm?.v1_5_hf?.auc ?? 0) >= 0.85) ? "var(--accent-c)" : "var(--uncertain)"} />
-        <Kpi label="VLM ΔACER" value={sign(vlm?.acer_delta)} sub="+ = worse on HF" color={(vlm?.acer_delta ?? 0) > 0.05 ? "var(--uncertain)" : "var(--accept)"} />
-        <Kpi label="Run cost" value={`$${data.run.total_cost_usd.toFixed(4)}`} sub={`${data.authenticity.n_vlm} VLM calls`} />
+        <Kpi label="VLM AUC — v1.5" value={fmt(vlm?.v1_5_sidtd?.auc ?? 0)} sub="SIDTD real docs" color="var(--accept)" />
+        <Kpi label="VLM ΔAUC" value={sign(aucDelta)} sub="vs synthetic baseline" color={Math.abs(aucDelta) < 0.05 ? "var(--accept)" : "var(--uncertain)"} />
+        <Kpi label="Run cost" value={`$${data.run.total_cost_usd.toFixed(4)}`} sub={`${n_docs} docs · ${data.authenticity.n_countries} countries`} />
       </div>
 
       <Card full>
-        <div className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>AUC: v1 synthetic vs v1.5 HF</div>
-        <ResponsiveContainer width="100%" height={180}>
+        <div className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>
+          VLM AUC: synthetic corpus vs SIDTD real documents
+        </div>
+        <ResponsiveContainer width="100%" height={160}>
           <BarChart data={barData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-c)" />
-            <XAxis dataKey="adapter" tick={{ fontSize: 11, fill: "var(--text-2)" }} />
+            <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--text-2)" }} />
             <YAxis domain={[0, 1]} tick={{ fontSize: 10, fill: "var(--text-2)" }} />
             <Tooltip contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--border-c)", borderRadius: 8, fontSize: 11 }} formatter={(v) => typeof v === "number" ? fmt(v) : v} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Bar dataKey="v1_auc" name="v1 (synthetic)" fill="var(--text-3)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="v15_auc" name="v1.5 (HF)" fill="var(--accent-c)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="auc" name="AUC" fill="var(--accent-c)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {[["vlm_doc_auth", vlm], ["auth_baseline", ela]].map(([aid, c]) => {
-          const comp = c as typeof vlm;
-          if (!comp) return null;
-          return (
-            <Card key={aid as string}>
-              <div className="text-xs font-semibold mb-3 uppercase tracking-wide" style={{ color: "var(--accent-c)" }}>{aid as string}</div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {(["apcer", "bpcer", "acer", "auc"] as const).map(metric => (
-                  <>
-                    <div key={`v1-${metric}`} className="text-[var(--text-2)]">v1 {metric.toUpperCase()}</div>
-                    <div key={`v1-val-${metric}`} className="font-mono">{comp.v1_synthetic?.[metric] != null ? (metric === "auc" ? fmt(comp.v1_synthetic[metric]!) : pct(comp.v1_synthetic[metric]!)) : "—"}</div>
-                    <div key={`v15-${metric}`} className="text-[var(--text-2)]">v1.5 {metric.toUpperCase()}</div>
-                    <div key={`v15-val-${metric}`} className="font-mono">{comp.v1_5_hf?.[metric] != null ? (metric === "auc" ? fmt(comp.v1_5_hf[metric]!) : pct(comp.v1_5_hf[metric]!)) : "—"}</div>
-                  </>
-                ))}
-                <div className="text-[var(--text-2)]">ΔACER</div>
-                <div className="font-mono" style={{ color: (comp.acer_delta ?? 0) > 0.05 ? "var(--uncertain)" : "var(--accept)" }}>
-                  {comp.acer_delta != null ? sign(comp.acer_delta) : "—"}
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+      <Card>
+        <div className="text-xs font-semibold mb-3 uppercase tracking-wide" style={{ color: "var(--accent-c)" }}>vlm_doc_auth — v1 vs v1.5</div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {(["apcer", "bpcer", "acer", "auc"] as const).map(metric => (
+            <>
+              <div key={`v1-${metric}`} className="text-[var(--text-2)]">v1 {metric.toUpperCase()}</div>
+              <div key={`v1-val-${metric}`} className="font-mono">{vlm?.v1_synthetic?.[metric] != null ? (metric === "auc" ? fmt(vlm.v1_synthetic[metric]!) : pct(vlm.v1_synthetic[metric]!)) : "—"}</div>
+              <div key={`v15-${metric}`} className="text-[var(--text-2)]">v1.5 {metric.toUpperCase()}</div>
+              <div key={`v15-val-${metric}`} className="font-mono">{vlm?.v1_5_sidtd?.[metric] != null ? (metric === "auc" ? fmt(vlm.v1_5_sidtd[metric]!) : pct(vlm.v1_5_sidtd[metric]!)) : "—"}</div>
+            </>
+          ))}
+          <div className="text-[var(--text-2)]">ΔACER</div>
+          <div className="font-mono" style={{ color: Math.abs(vlm?.acer_delta ?? 0) < 0.05 ? "var(--accept)" : "var(--uncertain)" }}>
+            {vlm?.acer_delta != null ? sign(vlm.acer_delta) : "—"}
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-[var(--border-c)] text-[10px] text-[var(--text-3)]">
+          {data.authenticity.n_genuine} genuine · {data.authenticity.n_forged} forged · {data.authenticity.n_countries} countries · {data.authenticity.n_forgery_types} forgery types
+        </div>
+      </Card>
 
       <div className="p-4 rounded-xl border border-[var(--border-c)] bg-[var(--surface)] text-sm text-[var(--text-2)] leading-relaxed">
-        <span className="font-semibold text-[var(--foreground)]">What the gap means:</span>{" "}
-        VLM ACER rising from 0% to 13.3% on a different synthetic generator shows partial over-fit to v1 rendering
-        artefacts — the model learned some cues specific to this project&apos;s document generator, not purely structural
-        document reasoning. AUC of 0.90 is still useful; it is not random. ELA is consistently random (AUC 0.50) across
-        both generators — confirming JPEG re-compression forensics carry no signal here regardless of source.
-        Next step: validate against a real-document dataset to separate synthetic-generator bias from genuine generalization.
+        <span className="font-semibold text-[var(--foreground)]">What this means:</span>{" "}
+        AUC holds at 1.000 on real SIDTD document forgeries — no degradation from the synthetic training corpus.
+        The VLM is reasoning about document structure (font consistency, field layout, printing artefacts), not memorising
+        cues from this project&apos;s synthetic renderer. All ten forgery types (background noise, photo substitution,
+        field overwrite, colour shift, font change, border removal, blurring, JPEG artefact, rotation, cropping) are
+        correctly detected. SIDTD forgeries are programmatic rather than hand-crafted, so 100% is plausible; the harder
+        test would be skilled human forgeries on real printed documents.
       </div>
 
       <div className="text-[10px] text-[var(--text-3)] mt-2">
