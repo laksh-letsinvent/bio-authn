@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "created": "2026-06-29",
+  "tasks": {
+    "extraction": {
+      "dataset": "MIDV-2020",
+      "description": "Specimen identity documents with dummy data and field/MRZ ground truth. 1000 document images across 10 document classes.",
+      "source_url": "http://smartengines.com/midv-2020/",
+      "paper": "Bulatov et al. 2020 \u2014 MIDV-2020: A Comprehensive Benchmark Dataset for Identity Document Analysis (arXiv:2010.04899)",
+      "license": "Non-commercial research only. Attribute as: K. Bulatov et al., MIDV-2020, SmartEngines, 2020.",
+      "local_path": "idv/data/midv2020/",
+      "subset": "stratified_150",
+      "subset_seed": 42,
+      "n_documents": 150,
+      "document_classes": "stratified across available classes",
+      "status": "ready"
+    },
+    "authenticity": {
+      "dataset": "SIDTD",
+      "description": "Synthetic Identity Document Tampering Dataset \u2014 genuine and forged (crop-and-replace, inpainting) document images with labels.",
+      "source_url": "https://github.com/Oriolrt/SIDTD_Dataset",
+      "paper": "Boned et al. 2024 \u2014 Synthetic dataset of ID and Travel Documents (Scientific Data, Nature; arXiv:2401.01858)",
+      "license": "CC BY-SA 2.5 \u2014 Creative Commons Attribution-ShareAlike 2.5. Stored in the CVC dataset repository.",
+      "local_path": "idv/data/sidtd/",
+      "subset": "100_genuine_100_forged",
+      "subset_seed": 42,
+      "n_genuine": 100,
+      "n_forged": 100,
+      "forgery_types": [
+        "crop_and_replace",
+        "inpainting"
+      ],
+      "status": "ready"
+    },
+    "face_on_document": {
+      "dataset": "DigiFace-1M (synthetic ID card pairs)",
+      "description": "Synthetic ID cards generated from existing DigiFace corpus identities. One card image (document portrait) + one plain selfie per identity. Cross-domain matching scenario.",
+      "source": "Generated from corpus/data/ (DigiFace-1M, Microsoft Research License Agreement, non-commercial research)",
+      "generator_script": "idv/build_idv_corpus.py --task face_match",
+      "local_path": "idv/data/face_doc_pairs/",
+      "subset_seed": 42,
+      "n_genuine_pairs": 100,
+      "n_impostor_pairs": 100,
+      "status": "ready"
+    },
+    "hf_authenticity_validation": {
+      "dataset": "SID_Set (saberzl/SID_Set)",
+      "description": "HuggingFace validation slice for cross-synthetic-generator generalization. 75 genuine (label=1, full_synthetic_*) + 75 forged (label=2, tampered_*) from the validation split.",
+      "source_url": "https://huggingface.co/datasets/saberzl/SID_Set",
+      "license": "CC-BY-4.0",
+      "attribution": "Saber Zl, SID_Set, Hugging Face, 2024.",
+      "local_path": "idv/data/hf_validation/",
+      "subset": "75_genuine_75_forged_validation_split",
+      "subset_seed": "streaming_order",
+      "n_genuine": 75,
+      "n_forged": 75,
+      "note": "Synthetic (different pipeline from v1). Framing: cross-generator generalization, not real-world validation.",
+      "status": "ready"
+    }
+  }
+}

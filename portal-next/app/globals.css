@@ -127,6 +127,25 @@
   }
 }
 
+/* ─── Hard Copy brand overrides (data-brand="hard-copy") ────────── */
+/* Use :root[attr] (specificity 0,2,0) to beat :root (0,1,0) and any
+   html.dark rules (0,1,1) that shadcn/next-themes may introduce. */
+:root[data-brand="hard-copy"] {
+  --accent-c: #C24A66;
+  --accent-2: #A855F7;
+  --primary-glow: rgba(194,74,102,.40);
+  --primary-wash: rgba(194,74,102,.10);
+  --info-zone: rgba(194,74,102,.10);
+  --page-glow: radial-gradient(1100px 420px at 50% -12%, rgba(194,74,102,.08), transparent 70%);
+}
+:root[data-brand="hard-copy"].light {
+  --accent-c: #9F1239;
+  --primary-glow: rgba(159,18,57,.30);
+  --primary-wash: rgba(159,18,57,.10);
+  --info-zone: rgba(159,18,57,.10);
+  --page-glow: radial-gradient(1100px 420px at 50% -12%, rgba(159,18,57,.05), transparent 70%);
+}
+
 /* ─── Prose markdown ────────────────────────────────────────────── */
 .prose {
   color: var(--foreground);

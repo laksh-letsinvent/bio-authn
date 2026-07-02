@@ -38,9 +38,11 @@ export const metadata: Metadata = {
   },
 };
 
+const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "face-value";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full`} data-brand={BRAND} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

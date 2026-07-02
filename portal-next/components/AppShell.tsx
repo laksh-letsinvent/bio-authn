@@ -7,9 +7,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Menu, Sun, Moon, Monitor,
   BookOpen, Map, Zap, BarChart2, Shield, Radio,
+  FileText, ScanText, CheckSquare, FlaskConical,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "face-value";
+
+const FACE_VALUE_NAV = [
   { href: "/",          label: "The Experiment", icon: BookOpen },
   { href: "/atlas",     label: "Atlas",           icon: Map },
   { href: "/matching",  label: "Matching",        icon: Zap },
@@ -18,12 +21,42 @@ const NAV_ITEMS = [
   { href: "/live",      label: "Live Demo",       icon: Radio, badge: "local" },
 ];
 
+const HARD_COPY_NAV = [
+  { href: "/hardcopy",          label: "The Experiment", icon: BookOpen },
+  { href: "/hardcopy/atlas",    label: "Atlas",           icon: Map },
+  { href: "/hardcopy/action",   label: "IDV in Action",   icon: ScanText },
+  { href: "/hardcopy/tryout",   label: "Try It",          icon: FlaskConical },
+  { href: "/hardcopy/results",  label: "Results",         icon: BarChart2 },
+];
+
+const BRAND_META = {
+  "face-value": {
+    name: "Face Value",
+    sub: "Bio Auth · Eval",
+    footer: "ArcFace · VLM · PAD",
+    homeHref: "/",
+    nav: FACE_VALUE_NAV,
+  },
+  "hard-copy": {
+    name: "Hard Copy",
+    sub: "Document IDV · Eval",
+    footer: "VLM · OCR · ArcFace",
+    homeHref: "/hardcopy",
+    nav: HARD_COPY_NAV,
+  },
+};
+
+const meta = BRAND_META[BRAND as keyof typeof BRAND_META] ?? BRAND_META["face-value"];
+
 function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
   return (
     <nav className="flex flex-col gap-0.5">
-      {NAV_ITEMS.map((item) => {
+      {meta.nav.map((item) => {
         const Icon = item.icon;
-        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        const active =
+          item.href === meta.homeHref
+            ? pathname === item.href || pathname === item.href + "/"
+            : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}
@@ -37,7 +70,7 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
           >
             <Icon size={15} className={active ? "text-[var(--accent-c)]" : "text-[var(--text-2)]"} />
             <span className="flex-1">{item.label}</span>
-            {item.badge && (
+            {"badge" in item && item.badge && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--uncertain-zone)] text-[var(--uncertain)] font-mono">
                 {item.badge}
               </span>
@@ -45,6 +78,27 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
           </Link>
         );
       })}
+
+      {/* Cross-link to sibling portal */}
+      <div className="mt-4 pt-3 border-t border-[var(--border-c)]">
+        {BRAND === "hard-copy" ? (
+          <a
+            href="https://bio-authn.letsinvent.co.uk"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-all"
+          >
+            <Zap size={12} className="shrink-0" />
+            <span>Face Value →</span>
+          </a>
+        ) : (
+          <a
+            href="https://hardcopy.letsinvent.co.uk"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-all"
+          >
+            <FileText size={12} className="shrink-0" />
+            <span>Hard Copy →</span>
+          </a>
+        )}
+      </div>
     </nav>
   );
 }
@@ -77,14 +131,14 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
     <div className="flex flex-col h-full bg-[var(--surface)] border-r border-[var(--border-c)]">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[var(--border-c)]">
-        <Link href="/" onClick={onClose} className="block">
+        <Link href={meta.homeHref} onClick={onClose} className="block">
           <div
             className="text-xl font-bold tracking-tight leading-tight"
             style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}
           >
-            Face Value
+            {meta.name}
           </div>
-          <div className="text-[11px] text-[var(--accent-c)] font-medium mt-0.5">Bio Auth · Eval</div>
+          <div className="text-[11px] text-[var(--accent-c)] font-medium mt-0.5">{meta.sub}</div>
         </Link>
       </div>
 
@@ -95,7 +149,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
 
       {/* Footer */}
       <div className="px-4 py-3 border-t border-[var(--border-c)] flex items-center justify-between">
-        <div className="text-[11px] text-[var(--text-2)] font-mono">ArcFace · VLM · PAD</div>
+        <div className="text-[11px] text-[var(--text-2)] font-mono">{meta.footer}</div>
         <ThemeToggle />
       </div>
     </div>
@@ -135,9 +189,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Sheet>
           <div className="flex-1 flex items-baseline gap-2">
             <span className="text-base font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Face Value
+              {meta.name}
             </span>
-            <span className="text-[11px] text-[var(--accent-c)] font-medium">Bio Auth · Eval</span>
+            <span className="text-[11px] text-[var(--accent-c)] font-medium">{meta.sub}</span>
           </div>
           <ThemeToggle />
         </div>

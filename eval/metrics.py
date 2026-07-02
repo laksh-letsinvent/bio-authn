@@ -450,6 +450,190 @@ def compute_disagreement(
 
 
 # ---------------------------------------------------------------------------
+# IDV extraction metrics (CER, field accuracy, structured F1)
+# ---------------------------------------------------------------------------
+
+def char_error_rate(hypothesis: str, reference: str) -> float:
+    """
+    Character Error Rate = edit_distance(hyp, ref) / len(ref).
+    Returns 0.0 if reference is empty. Capped at 1.0 (no negative CER).
+    """
+    if not reference:
+        return 0.0 if not hypothesis else 1.0
+    return min(_edit_distance(hypothesis, reference) / len(reference), 1.0)
+
+
+def _edit_distance(a: str, b: str) -> int:
+    """Standard Levenshtein edit distance."""
+    if len(a) < len(b):
+        a, b = b, a
+    if not b:
+        return len(a)
+    prev = list(range(len(b) + 1))
+    for ch_a in a:
+        curr = [prev[0] + 1]
+        for j, ch_b in enumerate(b):
+            curr.append(min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (ch_a != ch_b)))
+        prev = curr
+    return prev[-1]
+
+
+def compute_extraction_metrics(
+    predictions: list[dict[str, str]],
+    ground_truths: list[dict[str, str]],
+    fields: list[str],
+) -> dict:
+    """
+    Compute CER, field accuracy, and structured-field F1 over a list of
+    (predicted_fields, ground_truth_fields) pairs.
+
+    predictions: list of {field_name: extracted_value} dicts
+    ground_truths: list of {field_name: ground_truth_value} dicts
+    fields: canonical field list (used for F1 denominator)
+
+    Returns:
+      cer           — mean CER across all field values
+      field_accuracy — fraction of (doc, field) pairs where extraction is exact-match
+      field_f1      — {precision, recall, f1} treating exact-match fields as TP
+      per_field     — {field_name: {cer, accuracy}} for each field
+    """
+    assert len(predictions) == len(ground_truths)
+
+    all_cer: list[float] = []
+    exact_matches = 0
+    total_fields = 0
+    per_field_cer: dict[str, list[float]] = {f: [] for f in fields}
+    per_field_exact: dict[str, int] = {f: 0 for f in fields}
+    per_field_total: dict[str, int] = {f: 0 for f in fields}
+
+    tp = fp = fn = 0
+
+    for pred, gt in zip(predictions, ground_truths):
+        for f in fields:
+            gt_val   = (gt.get(f)   or "").strip()
+            pred_val = (pred.get(f) or "").strip()
+
+            # Skip fields with no ground truth (can't score them)
+            if not gt_val:
+                continue
+
+            cer = char_error_rate(pred_val, gt_val)
+            per_field_cer[f].append(cer)
+            per_field_total[f] += 1
+            total_fields += 1
+            all_cer.append(cer)
+
+            if pred_val == gt_val:
+                exact_matches += 1
+                per_field_exact[f] += 1
+                tp += 1
+            else:
+                if pred_val:
+                    fp += 1   # extracted something, but wrong
+                fn += 1       # missed the correct value
+
+    mean_cer = float(np.mean(all_cer)) if all_cer else 0.0
+    field_accuracy = exact_matches / total_fields if total_fields > 0 else 0.0
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+
+    per_field = {}
+    for f in fields:
+        n = per_field_total[f]
+        per_field[f] = {
+            "cer":      float(np.mean(per_field_cer[f])) if per_field_cer[f] else 0.0,
+            "accuracy": per_field_exact[f] / n if n > 0 else 0.0,
+        }
+
+    return {
+        "cer":            mean_cer,
+        "field_accuracy": field_accuracy,
+        "field_f1":       {"precision": precision, "recall": recall, "f1": f1},
+        "per_field":      per_field,
+    }
+
+
+# ---------------------------------------------------------------------------
+# IDV authenticity metrics (APCER, BPCER, ACER, ROC)
+# ---------------------------------------------------------------------------
+
+def compute_doc_auth_metrics(
+    decisions: list[bool],
+    labels: list[str],
+    confidences: list[Optional[float]],
+    target_bpcer: float = 0.10,
+) -> dict:
+    """
+    Compute document authenticity metrics from per-document decisions.
+
+    decisions:    list of bools — True = predicted genuine, False = predicted tampered
+    labels:       list of "genuine" or "forged" strings
+    confidences:  model confidence per doc (may be None for baselines)
+    target_bpcer: target bona-fide rejection rate for operating point selection
+
+    Returns: {apcer, bpcer, acer, auc, operating_threshold, roc}
+    where operating_threshold is confidence-based (0.5 for binary adapters).
+    """
+    assert len(decisions) == len(labels)
+    n = len(decisions)
+
+    n_genuine = sum(1 for l in labels if l == "genuine")
+    n_forged  = sum(1 for l in labels if l == "forged")
+
+    # Binary metrics at the decision threshold (confidence=0.5 for binary adapters)
+    apcer = sum(
+        1 for d, l in zip(decisions, labels) if l == "forged" and d is True
+    ) / n_forged if n_forged > 0 else 0.0
+
+    bpcer = sum(
+        1 for d, l in zip(decisions, labels) if l == "genuine" and d is False
+    ) / n_genuine if n_genuine > 0 else 0.0
+
+    acer = (apcer + bpcer) / 2
+
+    # ROC over confidence scores (if available).
+    # confidence is confidence in the decision, so for forged docs (d=False),
+    # P(genuine) = 1 - confidence.
+    confs = []
+    for c, d in zip(confidences, decisions):
+        if c is None:
+            confs.append(0.9 if d else 0.1)
+        else:
+            confs.append(c if d else 1.0 - c)
+    label_arr = np.array([1 if l == "genuine" else 0 for l in labels])
+    score_arr  = np.array(confs)  # higher = more likely genuine
+
+    auc = 0.0
+    if n_genuine > 0 and n_forged > 0:
+        try:
+            auc = float(roc_auc_score(label_arr, score_arr))
+        except Exception:
+            auc = 0.0
+
+    # ROC curve for output
+    thresholds = np.linspace(score_arr.min(), score_arr.max(), 200)
+    roc_curve = []
+    for t in thresholds:
+        predicted_genuine = score_arr >= t
+        apcer_t = float((predicted_genuine[label_arr == 0]).sum() / n_forged) if n_forged > 0 else 0.0
+        bpcer_t = float((~predicted_genuine[label_arr == 1]).sum() / n_genuine) if n_genuine > 0 else 0.0
+        roc_curve.append({"threshold": float(t), "apcer": apcer_t, "bpcer": bpcer_t})
+
+    return {
+        "apcer":               apcer,
+        "bpcer":               bpcer,
+        "acer":                acer,
+        "auc":                 auc,
+        "operating_threshold": 0.5,
+        "roc":                 roc_curve,
+        "n_genuine":           n_genuine,
+        "n_forged":            n_forged,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Full matcher result block
 # ---------------------------------------------------------------------------
 

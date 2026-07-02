@@ -94,8 +94,9 @@ class ArcFaceAdapter(MatcherAdapter):
             root      = MODEL_ROOT,
             providers = ["CPUExecutionProvider"],
         )
-        # det_size=(112,112): DigiFace images are 112×112; set detection window to match
-        self._app.prepare(ctx_id=-1, det_size=(112, 112))
+        # det_size=(640,640): works for full-frame card images (640×400). DigiFace
+        # selfies (112×112) still fall through to the direct-recognition fallback below.
+        self._app.prepare(ctx_id=-1, det_size=(640, 640))
         print("[arcface] InsightFace buffalo_l ready (CPU).")
 
     def _compute_embedding(self, image_path: str) -> list[float]:

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "genuine_uk",
+    "toggle_label": "Genuine",
+    "doc_image": "/data/idv-examples/genuine_007.png",
+    "card_image": "/data/idv-examples/card_141_genuine.png",
+    "honesty": "Synthetic document from SIDTD corpus (CC-BY-4.0). All results are precomputed — no live model calls.",
+    "classify": {
+      "adapter": "vlm_classify",
+      "doc_type": "National Identity Card",
+      "country": "GBR",
+      "confidence": 0.91,
+      "passed": true
+    },
+    "extract": {
+      "adapter": "vlm_extract",
+      "field_accuracy": 1.0,
+      "fields": [
+        { "name": "Surname",      "vlm": "SMITH",        "gt": "SMITH",        "match": true  },
+        { "name": "Given names",  "vlm": "JOHN JAMES",   "gt": "JOHN JAMES",   "match": true  },
+        { "name": "Date of birth","vlm": "01.12.1967",   "gt": "01.12.1967",   "match": true  },
+        { "name": "Doc number",   "vlm": "HF872246",     "gt": "HF872246",     "match": true  },
+        { "name": "Expiry",       "vlm": "04.11.2033",   "gt": "04.11.2033",   "match": true  },
+        { "name": "Nationality",  "vlm": "GBR",          "gt": "GBR",          "match": true  }
+      ],
+      "passed": true
+    },
+    "authenticate": {
+      "ela_verdict": "genuine",
+      "ela_confidence": 0.9,
+      "vlm_verdict": "genuine",
+      "vlm_confidence": 0.72,
+      "threshold": 0.5,
+      "passed": true,
+      "source_doc_id": "genuine_007"
+    },
+    "face_match": {
+      "adapter": "arcface",
+      "score": 0.0589,
+      "threshold": 0.2519,
+      "passed": false,
+      "note": "Cross-domain gap: printed portrait (degraded) vs synthetic selfie. Score 0.059 is below EER threshold 0.252. All 100 genuine pairs fell below this threshold — the gap is a known cross-domain challenge, not specific to this document.",
+      "source_pair_id": "genuine_141"
+    },
+    "decision": "REFER",
+    "decision_reason": "Auth passed; face match below cross-domain threshold. Human review recommended."
+  },
+  {
+    "id": "forged_field_replacement",
+    "toggle_label": "Forged",
+    "doc_image": "/data/idv-examples/tampered_003.png",
+    "card_image": "/data/idv-examples/card_141_impostor.png",
+    "honesty": "Synthetic document from SIDTD corpus (CC-BY-4.0). Field-replacement forgery: expiry and doc_number overwritten. All results are precomputed.",
+    "classify": {
+      "adapter": "vlm_classify",
+      "doc_type": "National Identity Card",
+      "country": "GBR",
+      "confidence": 0.89,
+      "passed": true
+    },
+    "extract": {
+      "adapter": "vlm_extract",
+      "field_accuracy": 0.67,
+      "fields": [
+        { "name": "Surname",      "vlm": "SMITH",        "gt": "SMITH",        "match": true  },
+        { "name": "Given names",  "vlm": "JOHN JAMES",   "gt": "JOHN JAMES",   "match": true  },
+        { "name": "Date of birth","vlm": "01.12.1967",   "gt": "01.12.1967",   "match": true  },
+        { "name": "Doc number",   "vlm": "XX999999",     "gt": "HF872246",     "match": false },
+        { "name": "Expiry",       "vlm": "01.01.2099",   "gt": "04.11.2033",   "match": false },
+        { "name": "Nationality",  "vlm": "GBR",          "gt": "GBR",          "match": true  }
+      ],
+      "passed": false
+    },
+    "authenticate": {
+      "ela_verdict": "genuine",
+      "ela_confidence": 0.9,
+      "vlm_verdict": "forged",
+      "vlm_confidence": 0.93,
+      "threshold": 0.5,
+      "passed": false,
+      "source_doc_id": "tampered_003"
+    },
+    "face_match": null,
+    "decision": "REJECT",
+    "decision_reason": "VLM flagged field-replacement forgery with 93% confidence. Pipeline stopped at authenticate stage."
+  }
+]
