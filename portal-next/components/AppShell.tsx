@@ -10,8 +10,6 @@ import {
   FileText, ScanText, CheckSquare, FlaskConical,
 } from "lucide-react";
 
-const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "face-value";
-
 const FACE_VALUE_NAV = [
   { href: "/",          label: "The Experiment", icon: BookOpen },
   { href: "/atlas",     label: "Atlas",           icon: Map },
@@ -46,9 +44,9 @@ const BRAND_META = {
   },
 };
 
-const meta = BRAND_META[BRAND as keyof typeof BRAND_META] ?? BRAND_META["face-value"];
-
 function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
+  const brand = pathname.startsWith("/hardcopy") ? "hard-copy" : "face-value";
+  const meta = BRAND_META[brand] ?? BRAND_META["face-value"];
   return (
     <nav className="flex flex-col gap-0.5">
       {meta.nav.map((item) => {
@@ -81,7 +79,7 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
 
       {/* Cross-link to sibling portal */}
       <div className="mt-4 pt-3 border-t border-[var(--border-c)]">
-        {BRAND === "hard-copy" ? (
+        {brand === "hard-copy" ? (
           <a
             href="https://bio-authn.letsinvent.co.uk"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-all"
@@ -127,6 +125,7 @@ function ThemeToggle() {
 }
 
 function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
+  const meta = BRAND_META[pathname.startsWith("/hardcopy") ? "hard-copy" : "face-value"] ?? BRAND_META["face-value"];
   return (
     <div className="flex flex-col h-full bg-[var(--surface)] border-r border-[var(--border-c)]">
       {/* Logo */}
@@ -159,6 +158,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const meta = BRAND_META[pathname.startsWith("/hardcopy") ? "hard-copy" : "face-value"] ?? BRAND_META["face-value"];
 
   return (
     <div className="flex flex-col min-h-screen">

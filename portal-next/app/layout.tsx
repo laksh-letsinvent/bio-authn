@@ -38,12 +38,12 @@ export const metadata: Metadata = {
   },
 };
 
-const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "face-value";
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} data-brand={BRAND} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full`} data-brand="face-value" suppressHydrationWarning>
       <head>
+        {/* Inline script sets data-brand before first paint — no FOUC */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){if(window.location.pathname.startsWith('/hardcopy')){document.documentElement.setAttribute('data-brand','hard-copy');}})();` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
