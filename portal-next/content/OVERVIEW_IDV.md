@@ -2,7 +2,7 @@
 
 Every account opening starts with a document. A passport, a driving licence, a national ID. Before a bank trusts you, it has to read that document, decide it's genuine, and check the photo on it is actually you.
 
-Hard Copy takes that apart, the same way Face Value took selfie matching apart. It's the second prototype on one identity pipeline, sharing the same engine underneath. The face work asked where a vision model fits in matching. This asks where it fits in documents, and I expect a different answer.
+"Hard Copy" takes that apart, the same way "Face Value" took selfie matching apart. It's the second prototype on one identity pipeline, sharing the same engine underneath. The face work asked where a vision model fits in matching. This asks where it fits in documents, and I expect a different answer.
 
 Here's the bet. On face matching the specialist model beat the vision model easily. On reading documents, messy layouts, many languages, faded print, I think the vision model wins. Same question, opposite result. That contrast is the point.
 
@@ -24,7 +24,7 @@ The vision model only sees a small stratified subset of the documents, because e
 
 ## The stack
 
-Same engine as Face Value: the ONNX face model for the match, Claude through its command-line mode for the vision calls, and the same eval harness and cost accounting. Hard Copy is its own front end in burgundy on its own address, but the instrument is shared. One pipeline, two prototypes.
+Same engine as "Face Value": the ONNX face model for the match, Claude through its command-line mode for the vision calls, and the same eval harness and cost accounting. "Hard Copy" is its own front end in burgundy on its own address, but the instrument is shared. One pipeline, two prototypes.
 
 ## What it found
 
