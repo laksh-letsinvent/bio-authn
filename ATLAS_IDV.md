@@ -270,7 +270,3 @@ Named for orientation, architecture-first, not endorsements.
 - **Photo substitution ≠ morphing.** Swapping the portrait vs blending two faces into one that matches both.
 - **APCER (documents) ≠ FAR.** Forged-accepted-as-genuine vs impostor-accepted in matching.
 - **An mDL ≠ a photo of a licence.** A signed, verifiable credential vs an image to OCR.
-
----
-
-*Maintenance note: §9–11 carry the dated facts (NIST SP 800-63-4, ISO/IEC 18013-7, eIDAS2 / EUDI Wallet, UK DIATF/DVS) most likely to age. Re-check before reusing this in the public Atlas.*
