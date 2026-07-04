@@ -16,17 +16,15 @@ Three checks a bank actually runs, each measured against a cheaper specialist:
 
 ## The documents
 
-I generate them. Public ID datasets turned out to be the wrong tool: the standard ones are gated behind forms and SFTP, and the sizes are absurd for a small test (124GB for one, 490GB for another). For a few hundred documents, generating is cleaner and gives something the public sets can't: exact ground truth, because I wrote the fields myself.
+I generate them. The public ID datasets are either gated behind forms or huge (one is 124GB, another 490GB), which is overkill for a few hundred documents. Generating is simpler, and it gives me exact ground truth, since I wrote the fields.
 
-A small generator builds ID cards from a synthetic face (the same DigiFace set as the face work), faker-made fields, and a valid machine-readable zone with correct check digits. Then it roughs them up like a phone photo, glare, blur, a little warp, so the reading test is honest. On pristine renders the OCR scores near-perfect and the vision model's real advantage never shows. For authenticity it makes tampered copies on purpose, swapped photos and edited dates, so every fake is labelled. No real person, no real document, seeded and reproducible.
+A small script builds ID cards: a synthetic face (the same DigiFace set as the face work), fake fields, and a valid machine-readable zone. Then it roughs them up like a phone photo so the reading test is fair. For authenticity it tampers copies on purpose, swapped photos, edited dates, so every fake is labelled. No real people, no real documents, all seeded. The vision model only sees a small subset of these, since each call costs money and time.
 
-The vision model only sees a small stratified subset of the documents, because each call costs money and time. Same cost discipline as the face work.
-
-The authenticity track also has an external validation run, against SIDTD — a dataset on HuggingFace of real identity document templates, ten countries, ten distinct forgery types. I did not make these documents. They come from a published academic dataset (CC BY-SA 2.5), and I pulled a stratified 20+20 sample for the eval. That run is reported separately in Results, and it is the only part of this project where the documents come from outside my own corpus.
+The one exception is the authenticity re-run, which uses SIDTD, a public dataset of real ID templates and forgeries (CC BY-SA 2.5). That's the only place the documents aren't mine. It's reported separately in Results.
 
 ## The stack
 
-Same engine as "Face Value": the ONNX face model for the match, Claude via its command-line interface for the vision calls, and the same eval harness and cost accounting. The extraction baseline is Tesseract 5 via pytesseract, run against the full document image with no layout pre-segmentation — deliberately the weak form, because a real OCR pipeline would crop to individual fields first. "Hard Copy" is its own front end in burgundy on its own address, but the instrument underneath is shared. One pipeline, two prototypes.
+Same engine as "Face Value": the ONNX face model for the match, Claude via its command-line interface for the vision calls, and the same eval harness and cost accounting. The extraction baseline is Tesseract 5, run against the whole document with no field cropping, deliberately the weak form, since a real OCR pipeline would crop each field first. "Hard Copy" is its own front end in burgundy on its own address, but the instrument underneath is shared. One pipeline, two prototypes.
 
 ## What it found
 
