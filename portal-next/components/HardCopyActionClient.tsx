@@ -43,7 +43,7 @@ type Example = {
   id: string;
   toggle_label: string;
   doc_image: string;
-  card_image: string;
+  card_image: string | null;
   honesty: string;
   classify: ClassifyResult;
   extract: ExtractResult;
@@ -501,7 +501,7 @@ export function HardCopyActionClient({ examples }: { examples: Example[] }) {
           </div>
 
           {/* Face match card image (shown only at face_match stage) */}
-          {activeStage === "face_match" && example.face_match !== null && (
+          {activeStage === "face_match" && example.face_match !== null && example.card_image !== null && (
             <div className="rounded-xl overflow-hidden border border-[var(--border-c)] bg-[var(--surface)]">
               <div className="relative w-full" style={{ aspectRatio: "8/5" }}>
                 <Image
@@ -520,7 +520,7 @@ export function HardCopyActionClient({ examples }: { examples: Example[] }) {
 
           {/* Honesty label */}
           <div className="p-3 rounded-xl border border-[var(--border-c)] bg-[var(--surface-2)]">
-            <div className="text-[10px] text-[var(--accent-c)] font-semibold uppercase tracking-wider mb-1">Synthetic data</div>
+            <div className="text-[10px] text-[var(--accent-c)] font-semibold uppercase tracking-wider mb-1">About this example</div>
             <p className="text-[11px] text-[var(--text-3)] leading-relaxed">{example.honesty}</p>
           </div>
         </div>
