@@ -1,5 +1,6 @@
 # --- corpus (images + binaries, regeneratable) ---
 corpus/data/
+idv/data/
 corpus/pad_attacks/
 corpus/manifest.json
 corpus/embeddings_arcface.pkl

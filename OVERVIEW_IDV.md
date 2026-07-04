@@ -32,7 +32,9 @@ Every bet landed, and the most useful result is the one that got worse.
 
 Reading: the vision model read the documents almost perfectly, a character error rate of 0.2% with 98% of fields exact, and far ahead of a plain OCR baseline. Honest caveat: that baseline wasn't given cropped field regions the way a production OCR pipeline would be, so read the size of the gap as directional rather than final. The real point holds. A vision model reads raw, messy documents with no per-template plumbing.
 
-Authenticity is where it gets interesting, and where I'm not done. On my own synthetic forgeries the model scored a perfect AUC of 1.0, which should worry you more than please you: those forgeries were too easy, and there was only one type. A perfect score on your own easy data tells you nothing. The honest next step is an external check on real document forgeries, and until that's run I won't put a generalisation number on this.
+A bigger caveat, worth saying out loud. This comparison was against a plain OCR baseline. It was not against a real IDV product, and it wouldn't win if it were. The specialist vendors banks actually use are years ahead on forgery: template libraries, hologram and UV checks, MRZ cross-checks, injection detection, and fraud intelligence that keeps up as new attacks appear. Nothing here competes with that, and I'm not claiming it does. The narrow finding is that a generalist model reads and reasons about documents surprisingly well with no bespoke pipeline. Read it as a look at where these models might help inside a real system, rather than a replacement for one.
+
+Authenticity is where it gets interesting, and where I'm being careful. On my own synthetic forgeries the model scored a perfect AUC of 1.0, which should worry you more than please you: those forgeries were too easy. So I re-ran it on real ID-document forgeries (SIDTD, ten tampering types including photo substitution, field overwrite, and font changes). It flagged every one. Encouraging, but I won't oversell it: the sample was small, 40 documents with only a couple per tampering type, and several of those "types" are image edits like rotation or blur rather than real fraud, so the genuine-fraud signal rests on a handful of examples. A perfect score here means "look closer," not "solved." A bigger run, weighted to the real fraud types, is what turns this into a number I'd stand behind.
 
 Face-on-document match: the document photo needs a looser threshold than a selfie, 0.25 against 0.28, with an equal-error rate around 3%. The gap is real but modest here, because my printed-card photo isn't badly degraded. A real scan-and-reprint would push it further.
 
@@ -40,7 +42,7 @@ The whole thing, both runs, cost about $3.50 in model calls.
 
 ## What this is not
 
-Synthetic documents, simulated tampering, a prototype. The faces aren't real people and the forgeries aren't real fraud, so the numbers show a method working, nothing more. The authenticity check still needs an external test on real document forgeries before I'll claim it generalises; that validation is pending. Extraction and face-match haven't been tested outside my own documents either. The vocabulary is in the [Atlas](#atlas); the attack side is in the threat model.
+Synthetic documents, simulated tampering, a prototype. The faces aren't real people and my own forgeries aren't real fraud, so the numbers show a method working, nothing more. I did test authenticity on real ID-document forgeries (SIDTD), and the model flagged all of them, but on a sample too small to publish a rate, so I read it as encouraging rather than proven. Extraction and face-match haven't been tested outside my own documents. The vocabulary is in the [Atlas](#atlas); the attack side is in the threat model.
 
 ## Where to look next
 

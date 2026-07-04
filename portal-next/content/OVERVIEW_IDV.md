@@ -26,19 +26,23 @@ The vision model only sees a small stratified subset of the documents, because e
 
 Same engine as Face Value: the ONNX face model for the match, Claude through its command-line mode for the vision calls, and the same eval harness and cost accounting. Hard Copy is its own front end in burgundy on its own address, but the instrument is shared. One pipeline, two prototypes.
 
-## What I expect, and why I'll check
+## What it found
 
-The vision model reads better than the OCR baseline on messy documents, and earns less where the OCR already nails clean text. The economics decide where it belongs, the same lesson as the faces.
+Every bet landed, and the most useful result is the one that got worse.
 
-It catches obvious tampering and misses good forgeries, the way it caught obvious face spoofs and missed the good ones.
+Reading: the vision model read the documents almost perfectly, a character error rate of 0.2% with 98% of fields exact, and far ahead of a plain OCR baseline. Honest caveat: that baseline wasn't given cropped field regions the way a production OCR pipeline would be, so read the size of the gap as directional rather than final. The real point holds. A vision model reads raw, messy documents with no per-template plumbing.
 
-The document-to-selfie match needs a looser threshold than selfie-to-selfie. I'll report how much looser, and what it costs in wrongly-rejected genuine users.
+A bigger caveat, worth saying out loud. This comparison was against a plain OCR baseline. It was not against a real IDV product, and it wouldn't win if it were. The specialist vendors banks actually use are years ahead on forgery: template libraries, hologram and UV checks, MRZ cross-checks, injection detection, and fraud intelligence that keeps up as new attacks appear. Nothing here competes with that, and I'm not claiming it does. The narrow finding is that a generalist model reads and reasons about documents surprisingly well with no bespoke pipeline. Read it as a look at where these models might help inside a real system, rather than a replacement for one.
 
-Numbers come after the run. I'd rather show them once than guess them now.
+Authenticity is where it gets interesting, and where I'm being careful. On my own synthetic forgeries the model scored a perfect AUC of 1.0, which should worry you more than please you: those forgeries were too easy. So I re-ran it on real ID-document forgeries (SIDTD, ten tampering types including photo substitution, field overwrite, and font changes). It flagged every one. Encouraging, but I won't oversell it: the sample was small, 40 documents with only a couple per tampering type, and several of those "types" are image edits like rotation or blur rather than real fraud, so the genuine-fraud signal rests on a handful of examples. A perfect score here means "look closer," not "solved." A bigger run, weighted to the real fraud types, is what turns this into a number I'd stand behind.
+
+Face-on-document match: the document photo needs a looser threshold than a selfie, 0.25 against 0.28, with an equal-error rate around 3%. The gap is real but modest here, because my printed-card photo isn't badly degraded. A real scan-and-reprint would push it further.
+
+The whole thing, both runs, cost about $3.50 in model calls.
 
 ## What this is not
 
-Synthetic documents, simulated tampering, a prototype. The faces aren't real people and the forgeries aren't real fraud, so the numbers will show a method working, nothing more. There's a separate validation planned against an outside dataset, to see whether it holds up on documents I didn't make myself. The vocabulary is in the [Atlas](#atlas); the attack side is in the threat model.
+Synthetic documents, simulated tampering, a prototype. The faces aren't real people and my own forgeries aren't real fraud, so the numbers show a method working, nothing more. I did test authenticity on real ID-document forgeries (SIDTD), and the model flagged all of them, but on a sample too small to publish a rate, so I read it as encouraging rather than proven. Extraction and face-match haven't been tested outside my own documents. The vocabulary is in the [Atlas](#atlas); the attack side is in the threat model.
 
 ## Where to look next
 
